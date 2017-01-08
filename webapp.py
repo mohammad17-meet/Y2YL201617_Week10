@@ -1,5 +1,7 @@
 from flask import Flask
 from model import *
+from flask import session as login_session
+from flask import g
 
 app = Flask(__name__)
 
@@ -9,20 +11,57 @@ DBSession = sessionmaker(bind=engine, autoflush=False)
 session = DBSession()
 
 @app.route('/')
+def showInventory():
+	inventory = session.query(Product).all()
+	htmlString = ""
+	for item in inventory:
+		htmlString += "<p>" + item.name + "</p>" + "<p>" + item.description + "</p>" +"<p>" + item.price + "</br></br>"
+	return htmlString
 @app.route('/inventory')
-def inventory():
-	return "To be implemented"
+def Inventory():
+	inventory = session.query(Product).all()
+	htmlString = ""
+	for item in inventory:
+		htmlString += "<p>" + item.name + "</p>" + "<p>" + item.description + "</p>" +"<p>" + item.price + "</br></br>"
+	return htmlString
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
-	return "To be implmented"
+	if request.method == 'GET':
+		return render_template('login.html')
+	elif request.method == 'POST':
+		email = request.form['email']
+		password = request.form['password']
+		if email is None or password is None:
+			flash('Missing Arguments')
+			redirect(url_for('login'))
+		if verify_password(email, password):
+			customer = session.query(Customer).filter_by(email=email).one()
+			flash('Login Successful, welcome, %s' % customer.name)
+			login_session['name'] = customer.name
+			login_session['email'] = email
+			login_session['id'] = customer.id
+			return redirect(url_for('inventory'))
+		else:
+			# incorrect username/password
+			flash('Incorrect username/password combination')
+			return redirect(url_for('login'))
 
 @app.route('/newCustomer', methods = ['GET','POST'])
 def newCustomer():
-	return "To be implemented"
+	def verify_password(email, password):
+	customer = session.query(Customer).filter_by(email = email).first() 
+	if not customer or not customer.verify_password(password):
+		return False
+	g.customer = customer
+	return True
 
 @app.route("/product/<int:product_id>")
 def product(product_id):
+	product = session.query(Product).filter_by(id=product_id).one()
+	return render_template('product.html' , product=product)
+
 	return "To be implemented"
 
 @app.route("/product/<int:product_id>/addToCart", methods = ['POST'])
