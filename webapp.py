@@ -1,7 +1,8 @@
 from flask import Flask, request, render_template, flash, redirect, url_for
-from model import *
+from database import *
 from flask import session as login_session
 from flask import g
+
 app = Flask(__name__)
 app.secret_key ="something"
 
@@ -14,6 +15,7 @@ def verify_password(email, password):
 	customer = session/query(Customer).filter_by(email=email).first()
 	if not customer or not customer.verify_password(password):
 			return False
+	else:
 		return True
 	pass
 
@@ -52,19 +54,20 @@ def newuser():
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
-        if name is None or email is None:
+        password = request.form['password']
+        if name is None or email is None or password is None:
             flash("Your form is missing arguments")
-            return redirect(url_for('newCustomer'))
-        if session.query(Customer).filter_by(email = email).first() is not None:
+            return redirect(url_for('newuser'))
+        if session.query(Person).filter_by(email = email).first() is not None:
             flash("A user with this email address already exists")
-            return redirect(url_for('newCustomer'))
-       	user = User(name = name, email=email)
+            return redirect(url_for('newuser'))
+       	user = Person(name = name, email=email)
         session.add(user)
         Myteam = Myteam(user=user)
         session.add(newUser)
         session.commit()
         flash("User Created Successfully!")
-        return redirect(url_for('Players'))
+        return redirect(url_for('players'))
     else:
         return render_template('newuser.html')
 
@@ -72,7 +75,7 @@ def newuser():
 
 @app.route('/players')
 def players():
-	items = session.query(Players).all()
+	itemsbbbbbbbbbbbbbbbbbbbbbbbb = session.query(Players).all()
 	return render_template('players.html', items=items)
 
 #@app.route('/inventory')

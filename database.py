@@ -9,13 +9,14 @@ class Person(Base):
 	id = Column(Integer, primary_key=True)
 	name = Column(String)  
 	email = Column(String)
+	password = Column(String)
 class Player(Base): 
 	__tablename__ = 'player' 
 	id = Column(Integer, primary_key=True)
-	img = Column(String)
 	name = Column(String)
 	champs = Column(Integer)
 	MVPs = Column(Integer)
+	myteam = relationship("Myteam", back_populates="myteam")
 
 
 class Myteam(Base): 
@@ -24,4 +25,5 @@ class Myteam(Base):
 	name = Column(String)
 	championships = Column(Integer)
 	MVPs = Column(Integer)
-	players = relationship("Player", back_populates="team")
+	player_id = Column(Integer, ForeignKey('player.id'))
+	players = relationship("Player", back_populates=("myteam")
