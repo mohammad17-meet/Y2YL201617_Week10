@@ -1,12 +1,13 @@
 from flask import Flask, request, render_template, flash, redirect, url_for
-from database import *
+from model import *
 from flask import session as login_session
 from flask import g
+
 
 app = Flask(__name__)
 app.secret_key ="something"
 
-engine = create_engine('sqlite:///fizzBuzz.db')
+engine = create_engine('sqlite:///project.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine, autoflush=False)
 session = DBSession()
@@ -43,7 +44,7 @@ def login():
 			login_session['name'] = customer.name
 			login_session['email'] = email
 			login_session['id'] = customer.id
-			return redirect(url_for('inventory'))
+			return redirect(url_for('players'))
 		else:
 			# incorrect username/password
 			flash('Incorrect username/password combination')
@@ -63,8 +64,8 @@ def newuser():
             return redirect(url_for('newuser'))
        	user = Person(name = name, email=email)
         session.add(user)
-        Myteam = Myteam(user=user)
-        session.add(newUser)
+        My_team = Myteam(player_id=user.id)
+        session.add(My_team)
         session.commit()
         flash("User Created Successfully!")
         return redirect(url_for('players'))
@@ -75,7 +76,7 @@ def newuser():
 
 @app.route('/players')
 def players():
-	itemsbbbbbbbbbbbbbbbbbbbbbbbb = session.query(Players).all()
+	items = session.query(Player).all()
 	return render_template('players.html', items=items)
 
 #@app.route('/inventory')

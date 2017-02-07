@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
 
-from database.py import *
+from model import *
 engine = create_engine('sqlite:///project.db')
 Base.metadata.create_all(engine)
 Base.metadata.bind = engine
@@ -28,3 +28,5 @@ session.add(tim_duncan)
 session.add(larry_bird)
 session.add(kobe_bryant)
 session.add(wilt_chamberlain)
+
+session.commit()
